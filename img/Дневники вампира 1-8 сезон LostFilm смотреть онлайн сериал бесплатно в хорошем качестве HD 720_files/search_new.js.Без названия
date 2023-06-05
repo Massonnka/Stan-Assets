@@ -1,0 +1,43 @@
+function FastSearch()
+{
+	$('#ajax_search').attr('autocomplete', 'off');
+	$('#ajax_search').blur(function(){
+		$('#searchsuggestions').fadeOut();
+	});
+
+	$('#ajax_search').keyup(function()
+	{
+		var inputString = $(this).val();
+
+		if(inputString.length == 0)
+			$('#searchsuggestions').fadeOut();
+		else
+		{
+			if (dle_search_value != inputString && inputString.length > 1)
+			{
+				clearInterval(dle_search_delay);
+				dle_search_delay = setInterval(function() { dle_do_search(inputString); }, 200);
+			}
+		}
+	});
+};
+
+function dle_do_search( inputString )
+{
+	clearInterval(dle_search_delay);
+
+	$('#searchsuggestions').remove();
+
+	$("body").append("<div id='searchsuggestions' style='display:none'></div>");
+
+	$.post(dle_root + "engine/mod_gameer/search/frontend/ajax_search.php", {query: ""+inputString+""}, function(data) {
+		$('#searchsuggestions').html(data).fadeIn().css({'position' : 'absolute', top:0, left:0}).position({
+			my: "left top",
+			at: "left bottom",
+			of: "#ajax_search",
+			collision: "fit flip"
+		});
+	});
+
+	dle_search_value = inputString;
+};

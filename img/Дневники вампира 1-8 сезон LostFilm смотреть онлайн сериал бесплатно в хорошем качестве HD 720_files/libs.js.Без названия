@@ -1,0 +1,172 @@
+$(document).ready(function(){$("#owl-related").owlCarousel({navigation:true,navigationText:["",""],items:4,itemsTablet:[990,4],itemsTabletSmall:[590,3],itemsMobile:[450,2],slideSpeed:300,paginationSpeed:400,singleItem:false,autoPlay:3000,pagination:false});$(".show-login").click(function(){$(".overlay").fadeIn("300");});$('#loginbox').append('<a href="#" class="overlay-close" title="Закрыть"></a>');$(".overlay-close").click(function(){$(".overlay").fadeOut("300");return false;});$('.all-wrap').append('<div class="light-off"></div>');$(".switcher label").click(function(){$(".light-off").fadeToggle("300");$(".player-box").toggleClass("z-fix");});$(".show-genres").click(function(){$(".main-menu").fadeToggle("300");});$(".add-com-but").click(function(){$("#addcform").fadeToggle("300");});$(".reply").click(function(){$("#addcform").fadeIn("300");});});$(function(){$('ul.tabs').delegate('li:not(.current)','click',function(){$(this).addClass('current').siblings().removeClass('current').parents('div.screens-trailer').find('div.box').hide().eq($(this).index()).fadeIn(400);})});$(document).ready(function(){var showgotop=300;$('body').append('<a href="#" class="gotop" title="Наверх"></a>');var s=$('.gotop');$(document).scroll(function(){var st=$(document).scrollTop();if(st<showgotop)s.fadeOut(400);else
+s.fadeIn(300);});$('.gotop').click(function(){$('html, body').animate({scrollTop:0},'slow');return false;});});function epscapeShowHide(){$(".epscape_tr").css('display','');$("#epscape_showmore").html('');return false;}function ShowOrHideEp(a,el){var c=$("#"+a);a=document.getElementById("image-"+a)?document.getElementById("image-"+a):null;var b=c.height()/200*1E3;3E3<b&&(b=3E3);250>b&&(b=250);"none"==c.css("display")?$("#showhide_"+el).html("свернуть"):$("#showhide_"+el).html("развернуть");"none"==c.css("display")?(c.show("blind",{},b),a&&(a.src=dle_root+"templates/"+dle_skin+"/dleimages/spoiler-minus.gif")):(2E3<b&&(b=2E3),c.hide("blind",{},b),a&&(a.src=dle_root+"templates/"+dle_skin+"/dleimages/spoiler-plus.gif"))}
+
+$(function() {
+	var newsId = $('[data-news-id]').data('news-id');
+	
+	checkTiming(newsId);
+	
+	$('.player_timing .save_btn').on('click', function() {
+		var season = window.player.Get('folder');
+		var series = season !== undefined ? window.player.PlNumber() - 1 : window.player.PlNumber();
+		var time = parseInt(window.player.CurrentTime());
+		var found = false;
+		
+		var timing = getCookie('timing');
+		timing = timing !== null ? timing.split(';') : [];
+		
+		if (timing.length) {
+			$.each(timing, function(key, value) {
+				value = value.split('-');
+				
+				if (value[0] == newsId) {
+					timing[key] = newsId + '-' + (season !== undefined ? season +'-' : '') + series +'-'+ time;
+					found = true;
+					
+					return;
+				}
+			});
+		}
+		
+		if (!found) {
+			timing.push(newsId + '-' + (season !== undefined ? season +'-' : '') + series +'-'+ time);
+		}
+		
+		if ($('.player_timing .continue_btn span').length) {
+			$('.player_timing .continue_btn span').text(((season !== undefined && season == 2) || series == 2 ? 'cо' : 'с') + (season !== undefined ? ' '+ season +' сезона ' : '') +' '+ series +' серии '+ getFormattedTime(time));
+		} else {
+			$('.player_timing .continue_btn').append(' <span>'+ ((season !== undefined && season == 2) || series == 2 ? 'cо' : 'с') + (season !== undefined ? ' '+ season +' сезона ' : '') +' '+ series +' серии '+ getFormattedTime(time) +'</span> &nbsp;<i title="Удалить время просмотра">X</i>');
+		}
+		$('.player_timing .continue_btn').addClass('active');
+		
+		setCookie('timing', timing.join(';'), 86400*365, '/');
+	});
+	
+	$('.player_timing .continue_btn').on('click', 'i', function(event) {
+		event.stopPropagation();
+		
+		var timing = getCookie('timing');
+		timing = timing !== null ? timing.split(';') : [];
+		
+		if (timing.length) {
+			$.each(timing, function(key, value) {
+				value = value.split('-');
+				
+				if (value[0] == newsId) {
+					timing.splice(key, 1);
+					setCookie('timing', timing.join(';'), 86400*365, '/');
+					
+					$('.player_timing .continue_btn').find('span').remove();
+					$('.player_timing .continue_btn').find('i').remove();
+					$('.player_timing .continue_btn').removeClass('active');
+					$('.player_timing .continue_btn').text($.trim($('.player_timing .continue_btn').text()));
+					
+					return;
+				}
+			});
+		}
+	});
+	
+	$('.player_timing').on('click', '.continue_btn.active', function() {
+		var timing = getCookie('timing');
+		timing = timing !== null ? timing.split(';') : [];
+		
+		if (timing.length) {
+			$.each(timing, function(key, value) {
+				value = value.split('-');
+				
+				if (value[0] == newsId) {
+					if (value.length == 4) {
+						var season = value[1];
+						var series = value[2] > 0 ? value[2] : 1;
+						var time = value[3];
+						console.log('Сезон: '+ season +'; Серия: '+ series + '; Время: '+ time);
+						window.player.PlayPlNumber(season);
+						window.player.PlayPlNumber(series);
+					} else {
+						var series = value[1];
+						var time = value[2];
+						
+						window.player.PlayPlNumber(series);
+					}
+					
+					if (time > 0) {
+						seekInterval = window.setInterval('playerSeek('+ time +')', 1000);
+					}
+					
+					return;
+				}
+			});
+		}
+	});
+});
+
+function checkTiming(newsId) {
+	var timing = getCookie('timing');
+	timing = timing !== null ? timing.split(';') : [];
+	
+	if (timing.length) {
+		$.each(timing, function(key, value) {
+			value = value.split('-');
+			
+			if (value[0] == newsId) {
+				if (value.length == 4) {
+					var season = value[1];
+					var series = value[2];
+					var time = getFormattedTime(value[3]);
+				} else {
+					var series = value[1];
+					var time = getFormattedTime(value[2]);
+				}
+				
+				$('.player_timing .continue_btn').append(' <span>'+ ((season !== undefined && season == 2) || series == 2 ? 'cо' : 'с') + (season !== undefined ? ' '+ season +' сезона ' : '') +' '+ series +' серии '+ time +'</span> &nbsp;<i title="Удалить время просмотра">X</i>');
+				$('.player_timing .continue_btn').addClass('active');
+				
+				return;
+			}
+		});
+	}
+}
+
+function getFormattedTime(sec) {
+	var h = sec/3600 ^ 0;
+	var m = (sec-h*3600)/60 ^ 0;
+	if (m < 10) {
+		m = '0'+ m;
+	}
+	var s = sec-h*3600-m*60;
+	if (s < 10) {
+		s = '0'+ s;
+	}
+	
+	return (h > 0 ? h +':' : '') + (m > 0 ? m +':' : '00:') + (s > 0 ? s : '00');
+}
+
+// Перемотка плеера
+function playerSeek(time) {
+	if (player.CurrentTime() > 0) {
+		player.Seek(time);
+		clearInterval(seekInterval);
+	}
+}
+
+// Работаем с куками
+function getCookie(name) {
+    var start = document.cookie.indexOf( name + '=' );
+    var len = start + name.length + 1;
+    if ( ( !start ) && ( name != document.cookie.substring( 0, name.length ) ) ) {
+        return null;
+    }
+    if ( start == -1 ) return null;
+    var end = document.cookie.indexOf( ';', len );
+    if ( end == -1 ) end = document.cookie.length;
+    return unescape( document.cookie.substring( len, end ) );
+}
+function setCookie(name, value, expires, path, domain, secure) {
+	expires instanceof Date ? expires = expires.toGMTString() : typeof(expires) == 'number' && (expires = (new Date(+(new Date) + expires * 1e3)).toGMTString());
+	var r = [name + "=" + escape(value)], s, i;
+	for(i in s = {expires: expires, path: path, domain: domain}){
+		s[i] && r.push(i + "=" + s[i]);
+	}
+	return secure && r.push("secure"), document.cookie = r.join(";"), true;
+}

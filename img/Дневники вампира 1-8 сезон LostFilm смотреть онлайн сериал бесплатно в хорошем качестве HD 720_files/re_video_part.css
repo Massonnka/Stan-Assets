@@ -1,0 +1,57 @@
+.stdplayer_show_player {
+height:38px;
+margin-top:10px;
+display:block;
+position:relative;
+}
+
+.prev_show_player {
+display:none;
+width:38px;
+height:38px;
+float:left;
+background-repeat:no-repeat;
+background:url(../file/2-1.png);
+cursor:pointer;
+}
+
+.next_show_player {
+display:none;
+width:39px;
+height:38px;
+float:left;
+background-repeat:no-repeat;
+background:url(../file/2-2.png);
+cursor:pointer;
+}
+
+.scrolltwo {
+width:600px;
+height:38px;
+float:left;
+overflow:hidden;
+}
+
+.epizode {
+background:#790000;
+border-right:1px solid #fff;
+color:#fff;
+cursor:pointer;
+float:left;
+font-size:13px;
+text-align:center;
+padding:12px 10px 10px;
+}
+
+.active_epz_sh {
+background:#dc0000;
+color:#fff;
+}
+
+.playerbox_show_player {
+display:block;
+}
+
+.player2 > iframe,.player2 > object {
+width:100%;
+}
